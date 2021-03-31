@@ -33,9 +33,22 @@ interface Post {
 interface PostProps {
   post: Post;
   preview: Promise<void>;
+  before: {
+    uid: string;
+    title: string;
+  };
+  after: {
+    uid: string;
+    title: string;
+  };
 }
 
-export default function Post({ post, preview }: PostProps): JSX.Element {
+export default function Post({
+  post,
+  preview,
+  after,
+  before,
+}: PostProps): JSX.Element {
   const router = useRouter();
 
   const readTime = post?.data.content.reduce((sumTotal, content) => {
@@ -88,18 +101,22 @@ export default function Post({ post, preview }: PostProps): JSX.Element {
               ))}
               <hr />
               <div className={styles.pagination}>
-                <div>
-                  <h1>Como utilizar Hooks</h1>
-                  <Link href="/">
-                    <a>Post anterior</a>
-                  </Link>
-                </div>
-                <div>
-                  <h1>Criando um app CRA do Zero</h1>
-                  <Link href="/">
-                    <a>Próximo post</a>
-                  </Link>
-                </div>
+                {before.title && (
+                  <div>
+                    <h1>{before?.title}</h1>
+                    <Link href={`/post/${before?.uid}`}>
+                      <a>Post anterior</a>
+                    </Link>
+                  </div>
+                )}
+                {after.title && (
+                  <div>
+                    <h1>{after?.title}</h1>
+                    <Link href={`/post/${after?.uid}`}>
+                      <a>Próximo post</a>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
             <section
@@ -170,6 +187,25 @@ export const getStaticProps: GetStaticProps = async ({
     ref: previewData?.ref ?? null,
   });
 
+  const afterPosts = await prismic.query(
+    Prismic.Predicates.at('document.type', 'posts'),
+    { orderings: '[document.first_publication_date]', after: response.id }
+  );
+
+  const beforePosts = await prismic.query(
+    Prismic.Predicates.at('document.type', 'posts'),
+    { orderings: '[document.first_publication_date desc]', after: response.id }
+  );
+  const after = {
+    uid: afterPosts.results_size > 0 ? afterPosts.results[0].uid : '',
+    title: afterPosts.results_size > 0 ? afterPosts.results[0].data.title : '',
+  };
+  const before = {
+    uid: beforePosts.results_size > 0 ? beforePosts.results[0].uid : '',
+    title:
+      beforePosts.results_size > 0 ? beforePosts.results[0].data.title : '',
+  };
+
   const post = {
     first_publication_date: response.first_publication_date,
     ...response,
@@ -186,6 +222,8 @@ export const getStaticProps: GetStaticProps = async ({
     props: {
       post,
       preview,
+      before,
+      after,
       redirect: 60 * 30, // 30 minutes
     },
   };
