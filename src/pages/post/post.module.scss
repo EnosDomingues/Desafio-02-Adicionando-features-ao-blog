@@ -16,10 +16,11 @@
     }
   }
 
-  &.previewContent {
-    background: linear-gradient(var(--white), transparent);
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+  hr {
+    margin-top: 3.75rem;
+    margin-bottom: 3.06rem;
+    opacity: 0.1;
+    border-bottom: 1px solid var(--gray-100);
   }
 }
 
@@ -94,4 +95,34 @@
   height: 100vh;
 
   color: var(--white);
+}
+
+.pagination {
+  margin-bottom: 5rem;
+  display: flex;
+  justify-content: space-between;
+
+  div {
+    h1 {
+      font-size: 1.125rem;
+      font-weight: 400;
+      line-height: 1.36rem;
+  
+      color: var(--white);
+    }
+  
+    a {
+      color: var(--pink);
+      font-size: 1rem;
+      font-weight: 600;
+  
+      
+    }
+
+    & + div {
+      text-align: right;
+    }
+  }
+
+  
 }

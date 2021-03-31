@@ -6,6 +6,7 @@ import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import Prismic from '@prismicio/client';
 import ptBR from 'date-fns/locale/pt-BR';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Header from '../../components/Header';
 import { getPrismicClient } from '../../services/prismic';
 
@@ -52,7 +53,7 @@ export default function Post({ post }: PostProps): JSX.Element {
             <img src={post.data.banner.url} alt="banner" />
           </div>
           <main className={commonStyles.container}>
-            <div className={styles.content}>
+            <div className={styles.postContent}>
               <h1>{post.data.title}</h1>
               <div className={styles.icons}>
                 <time>
@@ -84,8 +85,43 @@ export default function Post({ post }: PostProps): JSX.Element {
                   />
                 </div>
               ))}
+              <hr />
+              <div className={styles.pagination}>
+                <div>
+                  <h1>Como utilizar Hooks</h1>
+                  <Link href="/">
+                    <a>Post anterior</a>
+                  </Link>
+                </div>
+                <div>
+                  <h1>Criando um app CRA do Zero</h1>
+                  <Link href="/">
+                    <a>Próximo post</a>
+                  </Link>
+                </div>
+              </div>
             </div>
           </main>
+          <section
+            ref={elem => {
+              if (!elem) {
+                return;
+              }
+
+              const scriptElem = document.createElement('script');
+              scriptElem.src = 'https://utteranc.es/client.js';
+              scriptElem.async = true;
+              scriptElem.crossOrigin = 'anonymous';
+              scriptElem.setAttribute(
+                'repo',
+                'EnosDomingues/Desafio-02-Adicionando-features-ao-blog'
+              );
+              scriptElem.setAttribute('issue-term', 'pathname');
+              scriptElem.setAttribute('label', 'blog-comment');
+              scriptElem.setAttribute('theme', 'github-dark');
+              elem.appendChild(scriptElem);
+            }}
+          />
         </>
       )}
     </>
