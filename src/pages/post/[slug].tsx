@@ -32,9 +32,10 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  preview: Promise<void>;
 }
 
-export default function Post({ post }: PostProps): JSX.Element {
+export default function Post({ post, preview }: PostProps): JSX.Element {
   const router = useRouter();
 
   const readTime = post?.data.content.reduce((sumTotal, content) => {
@@ -101,27 +102,34 @@ export default function Post({ post }: PostProps): JSX.Element {
                 </div>
               </div>
             </div>
-          </main>
-          <section
-            ref={elem => {
-              if (!elem) {
-                return;
-              }
+            <section
+              ref={elem => {
+                if (!elem) {
+                  return;
+                }
 
-              const scriptElem = document.createElement('script');
-              scriptElem.src = 'https://utteranc.es/client.js';
-              scriptElem.async = true;
-              scriptElem.crossOrigin = 'anonymous';
-              scriptElem.setAttribute(
-                'repo',
-                'EnosDomingues/Desafio-02-Adicionando-features-ao-blog'
-              );
-              scriptElem.setAttribute('issue-term', 'pathname');
-              scriptElem.setAttribute('label', 'blog-comment');
-              scriptElem.setAttribute('theme', 'github-dark');
-              elem.appendChild(scriptElem);
-            }}
-          />
+                const scriptElem = document.createElement('script');
+                scriptElem.src = 'https://utteranc.es/client.js';
+                scriptElem.async = true;
+                scriptElem.crossOrigin = 'anonymous';
+                scriptElem.setAttribute(
+                  'repo',
+                  'EnosDomingues/Desafio-02-Adicionando-features-ao-blog'
+                );
+                scriptElem.setAttribute('issue-term', 'pathname');
+                scriptElem.setAttribute('label', 'blog-comment');
+                scriptElem.setAttribute('theme', 'github-dark');
+                elem.appendChild(scriptElem);
+              }}
+            />
+            {preview && (
+              <aside className={commonStyles.previewButton}>
+                <Link href="/api/exit-preview">
+                  <a>Sair do modo Preview</a>
+                </Link>
+              </aside>
+            )}
+          </main>
         </>
       )}
     </>
@@ -151,10 +159,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const { slug } = params;
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID('posts', String(slug), {});
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref ?? null,
+  });
 
   const post = {
     first_publication_date: response.first_publication_date,
@@ -171,6 +185,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return {
     props: {
       post,
+      preview,
       redirect: 60 * 30, // 30 minutes
     },
   };
