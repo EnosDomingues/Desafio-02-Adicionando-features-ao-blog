@@ -7,6 +7,7 @@ import Prismic from '@prismicio/client';
 import ptBR from 'date-fns/locale/pt-BR';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useMemo } from 'react';
 import Header from '../../components/Header';
 import { getPrismicClient } from '../../services/prismic';
 
@@ -15,6 +16,7 @@ import styles from './post.module.scss';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -49,6 +51,15 @@ export default function Post({
   after,
   before,
 }: PostProps): JSX.Element {
+  const updatedDateTime = useMemo(() => {
+    return format(
+      new Date(post.last_publication_date),
+      "'* editado em 'dd MMM yyyy', às ' HH:mm ",
+      {
+        locale: ptBR,
+      }
+    );
+  }, [post.last_publication_date]);
   const router = useRouter();
 
   const readTime = post?.data.content.reduce((sumTotal, content) => {
@@ -90,6 +101,9 @@ export default function Post({
                   {/*                   */}
                 </span>
               </div>
+              <span className={styles.editedDate}>
+                <span>{updatedDateTime}</span>
+              </span>
               {post.data.content.map(({ heading, body }) => (
                 <div key={heading} className={styles.postContent}>
                   <h2>{heading}</h2>
@@ -101,7 +115,7 @@ export default function Post({
               ))}
               <hr />
               <div className={styles.pagination}>
-                {before.title && (
+                {before?.title && (
                   <div>
                     <h1>{before?.title}</h1>
                     <Link href={`/post/${before?.uid}`}>
@@ -109,7 +123,7 @@ export default function Post({
                     </Link>
                   </div>
                 )}
-                {after.title && (
+                {after?.title && (
                   <div>
                     <h1>{after?.title}</h1>
                     <Link href={`/post/${after?.uid}`}>
